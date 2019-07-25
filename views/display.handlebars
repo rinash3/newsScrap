@@ -1,0 +1,23 @@
+{{#each article}}
+<h2>News Today</h2>
+<h2 class="title">{{title}}</h2>
+<a class="link" href="{{link}}">{{link}}</a>
+<br>
+<div>
+    <textarea id="comment" name="body"></textarea>
+    <br>
+    <button class="submit" value="{{_id}}">Submit Comment</button>
+    <br>
+</div>
+<div class="comment"></div>
+
+{{/each}}
+
+
+
+{{!-- <div id="notes">
+    <h2>JavaScript Fundamentals: Understanding APIs</h2>
+    <input id="titleinput" name="title">
+    <textarea id="bodyinput" name="body"></textarea>
+    <button data-id="5d390624e2995b3edca44b5e" id="savenote">Save Note</button>
+    </div> --}}
