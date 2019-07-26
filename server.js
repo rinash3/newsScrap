@@ -1,7 +1,6 @@
 var express = require("express");
 var logger = require("morgan");
 var mongoose = require("mongoose");
-var exphbs = require("express-handlebars");
 
 // Our scraping tools
 // Axios is a promised-based http library, similar to jQuery's Ajax method
@@ -29,56 +28,84 @@ app.use(express.json());
 // Make public a static folder
 app.use(express.static("public"));
 
-app.engine(
-  "handlebars",
-  exphbs({
-    defaultLayout: "main"
-  })
-);
-app.set("view engine", "handlebars");
-
 // Connect to the Mongo DB
-var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/unit18Populater";
-
-mongoose.connect(MONGODB_URI, {
+mongoose.connect("mongodb://localhost/unit18Populater", {
   useNewUrlParser: true
 });
 
+// Routes
+
 // A GET route for scraping the echoJS website
 app.get("/scrape", function (req, res) {
-  // First, we grab the body of the html with axios
-  axios.get("http://www.echojs.com/").then(function (response) {
-    // Then, we load that into cheerio and save it to $ for a shorthand selector
+  // First, we grab the body of the html with request
+  axios.get("http://dressage-news.com/").then(function (response) {
+    //request("http://dressage-news.com/", function(error, response, html) {
+
+    // Load the HTML into cheerio and save it to a variable
+    // '$' becomes a shorthand for cheerio's selector commands, much like jQuery's '$'
+    //var $ = cheerio.load(html);
     var $ = cheerio.load(response.data);
 
-    // Now, we grab every h2 within an article tag, and do the following:
-    $("article h2").each(function (i, element) {
-      // Save an empty result object
+    $("article").each(function (i, element) {
       var result = {};
-
-      // Add the text and href of every link, and save them as properties of the result object
-      result.title = $(this)
-        .children("a")
+      result.headline = $(this)
+        .children(".category-single")
+        .children(".content")
+        .children(".title")
         .text();
-      result.link = $(this)
+      console.log(result.headline);
+
+      result.summary = $(this)
+        .children(".category-single")
+        .children(".content")
+        .contents()['4'].data.trim();
+      console.log(result.summary);
+
+      result.url = $(this)
+        .children(".category-single")
+        .children(".content")
+        .children(".title")
         .children("a")
         .attr("href");
+      console.log(result.url);
 
-      // Create a new Article using the `result` object built from scraping
-      db.Article.create(result)
+      // Check to see if the article already exists in the database; if it does, don't add another copy; 
+      // but if it doesn't, then insert the article into the database
+      db.Article.findOneAndUpdate({
+          headline: result.headline
+        }, result, {
+          upsert: true
+        })
         .then(function (dbArticle) {
           // View the added result in the console
           console.log(dbArticle);
+
         })
         .catch(function (err) {
-          // If an error occurred, log it
-          console.log(err);
+          // If an error occurred, send it to the client
+          return res.json(err);
         });
     });
 
-    // Send a message to the client
+    // If we were able to successfully scrape and save an Article, send a message to the client
     res.send("Scrape Complete");
   });
+});
+
+app.get("/", function (req, res) {
+  // Grab every document in the Articles collection
+  db.Article.find({})
+    .then(function (dbArticle) {
+      // If we were able to successfully find Articles, send them back to the client
+      res.render("display", {
+        articles: dbArticle
+      });
+      //res.json(dbArticle);
+    })
+    .catch(function (err) {
+      // If an error occurred, send it to the client
+      res.json(err);
+    });
 });
 // Route for getting all Articles from the db
 app.get("/articles", function (req, res) {
@@ -104,7 +131,10 @@ app.get("/articles/:id", function (req, res) {
     .populate("note")
     .then(function (dbArticle) {
       // If we were able to successfully find an Article with the given id, send it back to the client
-      res.json(dbArticle);
+      //res.json(dbArticle);
+      res.render("articlewithNote", {
+        display: dbArticle
+      });
     })
     .catch(function (err) {
       // If an error occurred, send it to the client
