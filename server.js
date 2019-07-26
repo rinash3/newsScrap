@@ -79,16 +79,7 @@ app.get("/scrape", function (req, res) {
         .attr("href");
 
 
-      db.Article.findOneAndUpdate({
-          title: result.title
-        }, result, {
-          upsert: true
-        })
-        .then(function (dbArticle) {
-          // View the added result in the console
-          console.log(dbArticle);
-
-        })
+      db.Article.create(result)
         .then(function (dbArticle) {
           // View the added result in the console
           console.log(dbArticle);
@@ -98,6 +89,7 @@ app.get("/scrape", function (req, res) {
           console.log(err);
         });
     });
+
 
     // Send a message to the client
     res.send("Scrape Complete");

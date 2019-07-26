@@ -3,7 +3,7 @@ $(document).on("click", ".post", function () {
 
     var thisId = $(this).attr("data-id");
     console.log(thisId);
-    if ($("#new-username").val() != "" && $("#new-comment").val() != "") {
+    if ($("#new-username").val() != "" && $("#new-note").val() != "") {
         // Run a POST request to change the note, using what's entered in the inputs
         $.ajax({
                 method: "POST",
@@ -12,7 +12,7 @@ $(document).on("click", ".post", function () {
                     // Value taken from title input
                     username: $("#new-username").val(),
                     // Value taken from note textarea
-                    text: $("#new-comment").val()
+                    text: $("#new-note").val()
                 }
             })
             // when  done
@@ -25,7 +25,7 @@ $(document).on("click", ".post", function () {
 
         // Also, remove the values entered in the input and textarea for note entry
         $("#new-username").val("");
-        $("#new-comment").val("");
+        $("#new-note").val("");
     }
 });
 

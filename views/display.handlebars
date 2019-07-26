@@ -1,7 +1,7 @@
 <div class="container">
     <div class="row">
         <div class="col-12">
-            <h1>Scraper
+            <h1> News Scraper
                 <button class="btn btn-primary scrape" type="button">Scrape New Articles</button>
             </h1>
         </div>
@@ -14,13 +14,15 @@
     <div class="row">
         <div class="col-12">
             <ul class="list-group">
-                {{#each article}}
+                {{#each articles}}
                 <li class="list-group-item">
                     <div class="row">
                         <div class="col-4">
                             <h4>{{title}}</h4>
+
                         </div>
                         <div class="col-5">
+
                             <p><a href="{{link}}">{{link}}</a></p>
                         </div>
                         <div class="col-3">
