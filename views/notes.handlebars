@@ -40,7 +40,7 @@
                 <h4>Add your note.</h4>
             </div>
             <div class="modal-body">
-                <p>Add a Note on this article. This article ID is {{this._id}}. This headline is "{{this.title}}".</p>
+                <p>Add a Note on this article {{this._id}}. This title is "{{this.title}}".</p>
                 <form method="POST" action="/notes/{{this._id}}">
                     <div class="form-group">
                         <label>Note:</label>
@@ -52,34 +52,12 @@
                 </form>
 
             </div>
-            <div class="modal-footer">
-            </div>
         </div>
     </div>
 </div>
 {{/each}}
 
-</ul>
-<br><br>
-</div>
-</div>
-<div class="row">
-    <div class="col-7">
-        <form>
-            <div class="form-group">
-                <label for="new-username">Username:</label>
-                <input type="text" class="form-control" id="new-username">
-            </div>
-            <div class="form-group">
-                <label for="new-comment"></label>
-                <textarea class="form-control" rows="4" placeholder="Enter your comment..." id="new-comment"></textarea>
-            </div>
-            <button type="button" class="btn btn-primary post" data-id="{{article._id}}">Post Comment</button>
-        </form>
-        <br><br>
-    </div>
-</div>
-</div>
+
 
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script src="/app-notes.js"></script>

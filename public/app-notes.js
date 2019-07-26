@@ -15,7 +15,7 @@ $(document).on("click", ".post", function () {
                     text: $("#new-comment").val()
                 }
             })
-            // With that done
+            // when  done
             .then(function (data) {
                 // Log the response
                 console.log(data);
