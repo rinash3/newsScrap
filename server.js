@@ -37,57 +37,37 @@ mongoose.connect("mongodb://localhost/unit18Populater", {
 
 // A GET route for scraping the echoJS website
 app.get("/scrape", function (req, res) {
-  // First, we grab the body of the html with request
-  axios.get("http://dressage-news.com/").then(function (response) {
-    //request("http://dressage-news.com/", function(error, response, html) {
-
-    // Load the HTML into cheerio and save it to a variable
-    // '$' becomes a shorthand for cheerio's selector commands, much like jQuery's '$'
-    //var $ = cheerio.load(html);
+  // First, we grab the body of the html with axios
+  axios.get("http://www.echojs.com/").then(function (response) {
+    // Then, we load that into cheerio and save it to $ for a shorthand selector
     var $ = cheerio.load(response.data);
 
-    $("article").each(function (i, element) {
+    // Now, we grab every h2 within an article tag, and do the following:
+    $("article h2").each(function (i, element) {
+      // Save an empty result object
       var result = {};
-      result.headline = $(this)
-        .children(".category-single")
-        .children(".content")
-        .children(".title")
+
+      // Add the text and href of every link, and save them as properties of the result object
+      result.title = $(this)
+        .children("a")
         .text();
-      console.log(result.headline);
-
-      result.summary = $(this)
-        .children(".category-single")
-        .children(".content")
-        .contents()['4'].data.trim();
-      console.log(result.summary);
-
-      result.url = $(this)
-        .children(".category-single")
-        .children(".content")
-        .children(".title")
+      result.link = $(this)
         .children("a")
         .attr("href");
-      console.log(result.url);
 
-      // Check to see if the article already exists in the database; if it does, don't add another copy; 
-      // but if it doesn't, then insert the article into the database
-      db.Article.findOneAndUpdate({
-          headline: result.headline
-        }, result, {
-          upsert: true
-        })
+      // Create a new Article using the `result` object built from scraping
+      db.Article.create(result)
         .then(function (dbArticle) {
           // View the added result in the console
           console.log(dbArticle);
-
         })
         .catch(function (err) {
-          // If an error occurred, send it to the client
-          return res.json(err);
+          // If an error occurred, log it
+          console.log(err);
         });
     });
 
-    // If we were able to successfully scrape and save an Article, send a message to the client
+    // Send a message to the client
     res.send("Scrape Complete");
   });
 });
@@ -132,7 +112,7 @@ app.get("/articles/:id", function (req, res) {
     .then(function (dbArticle) {
       // If we were able to successfully find an Article with the given id, send it back to the client
       //res.json(dbArticle);
-      res.render("articlewithNote", {
+      res.render("notes", {
         display: dbArticle
       });
     })
@@ -153,7 +133,9 @@ app.post("/articles/:id", function (req, res) {
       return db.Article.findOneAndUpdate({
         _id: req.params.id
       }, {
-        note: dbNote._id
+        $push: {
+          note: dbNote._id
+        }
       }, {
         new: true
       });
@@ -166,6 +148,27 @@ app.post("/articles/:id", function (req, res) {
       // If an error occurred, send it to the client
       res.json(err);
     });
+});
+
+//Delete note from DB
+app.delete("/delete/:id", function (req, res) {
+  // Remove a comment using the objectID
+  db.Note.remove({
+      _id: req.params.id
+    },
+    function (error, removed) {
+      // Log any errors from mongojs
+      if (error) {
+        console.log(error);
+        res.send(error);
+      } else {
+        // Otherwise, send the mongojs response to the browser
+        // This will fire off the success function of the ajax request
+        console.log(removed);
+        res.send(removed);
+      }
+    }
+  );
 });
 
 // Start the server
